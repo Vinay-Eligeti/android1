@@ -1,0 +1,396 @@
+Practical-1
+Write a python program to demostrate bitwise operation.
+->Code
+Method 1: For Numbers 
+def bitwise_op(a,b):
+    bitand=a&b
+    print("Bitwise And: ",bitand)
+    bitor=a|b
+    print("Bitwise OR: ",bitor)
+    bitxor=a^b
+    print("Bitwise XOR: ",bitxor)
+    a=-a
+    print("Bitwise NOT for a: ",a)
+    b=-b
+    print("Bitwise NOT for b: ",b)
+    left=a<<1
+    print("Bitwise Left Shift: ",left)
+    right=b>>1
+    print("Bitwise Right Shift: ",right)
+a=int(input("Enter a: "))
+b=int(input("Enter b: "))
+bitwise_op(a,b)
+
+Method 2: For Text
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+print("Boolean Retrieval Model usign Bitwise Operation in term incidence document matrix")
+corpus={'this is the first document','this is the second document','and this is the third document','is thisthe first document'}
+print("The corpus is: \n",corpus)
+vectorizer=CountVectorizer()
+x=vectorizer.fit_transform(corpus)
+df=pd.DataFrame(x.toarray(),columns=vectorizer.get_feature_names_out())
+print("The generated data frame:")
+print(df)
+print("Query processing on term document incidence matrix")
+#AND
+print("1.Find all the document ids for query 'this' AND 'first'")
+alldata=df[(df['this']==1)&(df['first']==1)]
+print("Document ids where with 'this' AND 'first' are present are:",alldata.index.tolist())
+
+#OR
+print("2.Find all the document ids for query 'this' OR 'first'")
+alldata=df[(df['this']==1)|(df['first']==1)]
+print("Document ids where with 'this' OR 'first' are present are:",alldata.index.tolist())
+
+#NOT
+print("2.Find all the document ids for query NOT 'and'")
+alldata=df[(df['and']!=1)]
+print("Document ids where 'and' term is not present are:",alldata.index.tolist())
+
+Practical-2
+Write a python program to implement page rank.
+->Code
+Method 1
+def page_rank(graph, damping_factor = 0.85, max_iteration=100,tolerance = 1e-6):
+    num_pages = len(graph)
+    initial_page_rank = 1.0/num_pages
+    
+    page_ranks = {page:initial_page_rank for page in graph}
+    
+    for _ in range(max_iteration):
+        new_page_ranks = {}
+    
+        for page in graph:
+            new_rank = (1-damping_factor)/num_pages
+    
+            for link in graph:
+                if page in graph[link]:
+                    new_rank += damping_factor*(page_ranks[link]/len(graph[link]))
+            new_page_ranks[page] = new_rank
+        
+        convergence = all(abs(new_page_ranks[page] - page_ranks[page]) < tolerance for page in graph)
+    
+        page_ranks = new_page_ranks
+        if convergence:
+            break
+        return page_ranks
+    
+graph = {
+    "A":["B","C"],
+    "B":["A"],
+    "C":["A","B"],
+    "D":["B"]
+}
+result = page_rank(graph)	
+for page,rank in sorted(result.items(), key=lambda x:x[1],reverse=True):
+    print(f"Page : {page} - Page Rank : {rank:4f}")
+
+Method 2 (Directed Graph using networkx)
+import networkx as nx
+import pylab as plt
+D = nx.DiGraph()
+D.add_weighted_edges_from([("A","B",1),("A","C",1),("C","A",1),("B","C",1)])
+page_rank = nx.pagerank(D)
+print(page_rank)
+nx.draw_networkx(D,with_labels = True, node_color = "#0000ff")
+
+Method 3(without directed graph)
+import networkx as nx
+import pylab as plt
+G = nx.DiGraph()
+{G.add_node(k) for k in ["A","B","C","D","E","F","G"]}
+G.add_edges_from([("G",'A'),("A",'G'),("F","A"),("E","A"),("A","D"),("D","B"),("B","A"),("A","C"),("C","A"),("D","F")])
+ppr1 = nx.pagerank(G)
+print("Page Rank ",ppr1)
+pos = nx.spiral_layout(G)
+print(pos)
+nx.draw_networkx(G,with_labels = True, node_color = "#0000ff")
+plt.show()
+
+Practical-3
+Write a program to implement Levenshtein Distance.
+->Code
+def leven(x,y):
+    n=len(x)
+    m=len(y)
+    A=[[i+j for j in range(m+1)] for i in range(n+1)]
+    for i in range(n):
+        for j in range (m):
+            A[i+1][j+1]=min(A[i][j+1]+1,
+                           A[i+1][j]+1,
+                           A[i][j]+int(x[i]!=y[j]))
+    return A[n][m]
+print(leven("brap","rap"))
+print(leven("trial","try"))
+print(leven("horse","force"))
+print(leven("rose","erode"))
+
+
+Practical-4
+Write a program to compute Similarity between two documents .
+1) Jaccard Similarity 
+->Code
+def jaccard_Similarity(doc1,doc2):
+    words_doc1=set(doc1.lower().split())
+    words_doc2=set(doc2.lower().split())
+    intersection=words_doc1.intersection(words_doc2)
+    union=words_doc1.union(words_doc2)
+    return float(len(intersection))/len(union)
+doc_1="Data is the new oil of the digital economy"
+doc_2="Data is a new oil"
+jaccard_Similarity(doc_1,doc_2)
+
+
+2) Cosine similarity
+->Code
+Method-1
+from sklearn.metrics.pairwise import cosine_similarity
+doc_1="Data is the new oil of the digital economy"
+doc_2="Data is a new oil"
+data=[doc_1,doc_2]
+from sklearn.feature_extraction.text import TfidfVectorizer
+Tfidf_vect=TfidfVectorizer()
+vector_matrix=Tfidf_vect.fit_transform(data)
+tokens=Tfidf_vect.get_feature_names_out()
+
+create_dataframe=(vector_matrix.toarray(),tokens)
+cosine_similarity_matrix=cosine_similarity(vector_matrix)
+create_dataframe=print(cosine_similarity_matrix,['doc_1','doc_2'])
+
+Method-2
+import spacy
+from spacy.cli.download import download
+download(model="en_core_web_sm")
+nlp=spacy.load('en_core_web_sm')
+doc1=nlp(u'Hello hi there!')
+doc2=nlp(u'Hello hi there!')
+doc3=nlp(u'Heywhatsup?')
+print(doc1.similarity(doc2))
+print(doc2.similarity(doc3))
+print(doc1.similarity(doc3))
+
+Practical-5
+Write a Python Program to implement MapReduce.
+->Code
+##mapper and reducer##
+from functools import reduce
+from collections import defaultdict
+def mapper(data):
+    char_count=defaultdict(int)
+    for char in data:
+        if char.isalpha():
+            char_count[char.lower()]+=1
+    return char_count.items()
+def reducer(counts1,counts2):
+    merged_counts=defaultdict(int)
+    for char,count in counts1:
+        merged_counts[char]+=count
+    for char,count in counts2:
+        merged_counts[char]+=count
+    return merged_counts.items()
+
+if __name__=="__main__":
+    #example dataset
+    dataset="Hello,World! This is a MapReduce example."
+    #split the data set into chunks(assuming a distributed env)
+    chunks=[chunk for chunk in dataset.split()]
+    #map step
+    mapped_result=map(mapper,chunks)
+    #reduce step
+    final_counts=reduce(reducer,mapped_result)
+    #print the result
+    for char,count in final_counts:
+        print(f'Charater:{char},Count:{count}')
+		
+
+Practical-6
+Write a python program on Hits Algorithm.
+->Code
+#HITS Algorithm
+import networkx as nx
+# Step 2: Create a graph and add edges
+G = nx.DiGraph()
+G.add_edges_from([(1, 2), (1, 3), (2, 4), (3, 4), (4, 5)])
+
+# Step 3: Calculate the HITS scores
+authority_scores, hub_scores = nx.hits(G)
+
+# Step 4: Print the scores
+print("Authority Scores:", authority_scores)
+print("Hub Scores:", hub_scores)
+
+Practical-7
+Write a Python Program for processing document having stopwords
+->Code
+##processing document having stopwords##
+##a)download stopwords
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+set(stopwords.words('english'))
+#b)tokenize $ filter sentence
+nltk.download('punkt')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+example_sent="This is a sample sentence,showing off the stop words filteration."
+stop_words=set(stopwords.words('english'))
+word_tokens=word_tokenize(example_sent)
+filtered_sentence=[w for w in word_tokens if not w in stop_words]
+filtered_sentence=[]
+for w in word_tokens:
+    if w not in stop_words:
+        filtered_sentence.append(w)
+print(word_tokens)
+print(filtered_sentence)
+
+Practical-8
+Write a Python Program to implement Twitter	
+->Code
+#!pip install ntscraper
+import pandas as pd
+from ntscraper import Nitter
+scarper=Nitter()
+
+tweets=scarper.get_tweets('narendramodi',mode='user',number=5)
+final_tweets=[]
+for tweet in tweets['tweets']:
+    data=[tweet['link'],tweet['text'],tweet['date'],tweet['stats']['likes']]
+    final_tweets.append(data)
+final_tweets
+data=pd.DataFrame(final_tweets,columns=['link','text','date','no.of likes'])
+print(data)
+
+Practical-9
+Write a python program to implement simple web crawler
+->Code
+#!pip install parsel
+import requests
+from parsel import Selector
+import time
+start = time.time()
+response = requests.get("http://recurship.com/")
+selector = Selector(response.text)
+href_links = selector.xpath("//a/@href").getall()
+image_links = selector.xpath("//img/@src").getall()
+print("-----------------Href Links----------------------------")
+print(href_links)
+print("-----------------Image Links---------------------------")
+print(image_links)
+end = time.time()
+print("Time Taken in seconds : ",end-start)
+
+
+Practical-10
+Write a program to implement XML Retrieval.
+->Code
+import xml.etree.ElementTree as ET
+import networkx as nx
+
+def parse_xml(xml_text):
+    root=ET.fromstring(xml_text)
+    return root
+
+def generate_web_graph(xml_root):
+    G=nx.DiGraph()
+    for page in xml_root.findall('.//page'):
+        page_id=page.find('id').text
+        G.add_node(page_id)
+        links=page.findall('.//link')
+        for link in links:
+            target_page_id=link.text
+            G.add_edge(page_id,target_page_id)
+            
+    return G
+
+def compute_topic_specific_pagerank(graph,topic_nodes,alpha=0.85,max_iter=100,tol=1e-6):
+    personalization={node:1.0 if node in topic_nodes else 0.0 for node in graph.nodes}
+    return nx.pagerank(graph,alpha=alpha,personalization=personalization,max_iter=max_iter,tol=tol)
+if __name__=="__main__":
+    #example XML text representing web page and links
+    example_xml="""
+    <webgraph>
+    <page>
+    <id>1</id>
+    <link>2</link>
+    <link>3</link>
+    </page>
+    <page>
+    <id>2</id>
+    <link>1</link>
+    <link>3</link>
+    </page>
+    </webgraph>
+    """
+    
+    xml_root=parse_xml(example_xml)
+    
+    #Generate web graph
+    web_graph=generate_web_graph(xml_root)
+    
+    #Compute topic-specific PageRank for nodes 1 and 2
+    topic_specific_pagerank=compute_topic_specific_pagerank(web_graph,topic_nodes=['1','2'])
+    
+    #print the results
+    print("Topic Specific Pagerank: ")
+    for node, score in sorted(topic_specific_pagerank.items(),key=lambda x:x[1],reverse=True):
+        print(f"Node:{node}-PageRank:{score:.4f}")
+
+Extra Practicals
+Practical-11
+Retreival of data -- xml.etree.ElementTree, lxml and xml.
+->Code
+import xml.etree.ElementTree as ET
+
+# Load the XML data from a file or a string
+xml_data = '''<root>
+    <person>
+        <name>Vinay</name>
+        <age>20</age>
+        <city>Mumbai</city>
+    </person>
+    <person>
+        <name>Ganesh</name>
+        <age>20</age>
+        <city>Mumbai</city>
+    </person>
+</root>'''
+tree = ET.fromstring(xml_data)
+
+# Retrieve data from XML
+for person in tree.findall('person'):
+    name = person.find('name').text
+    age = person.find('age').text
+    city = person.find('city').text
+    print(f"Name:{name}, Age:{age}, City:{city}")
+
+
+Practical-12
+Retreival of data -- lxml .
+->Code
+from lxml import etree
+
+#Load the XML data from a file or a string
+xml_data = '''<root>
+    <person>
+        <name>Kartik</name>
+        <age>22</age>
+        <city>Mumbai</city>
+    </person>
+    <person>
+        <name>Sourav</name>
+        <age>20</age>
+        <city>Mumbai</city>
+    </person>
+</root>'''
+
+#Parse the XML data
+tree = etree.fromstring(xml_data)
+
+#Retreive data from XMl
+for person in tree.xpath('//person'):
+    name = person.xpath('name/text()')[0]  #[0]= for starting from first element 
+    age = person.xpath('age/text()')[0]
+    city = person.xpath('city/text()')[0]
+    print(f"Name:{name}, Age:{age}, City:{city}")

@@ -1,0 +1,639 @@
+
+
+1.Write a python program to plot word cloud for a wikipedia page of any topic.
+
+step 1: !pip install wordcloud
+step 2: from wordcloud import WordCloud,STOPWORDS
+        import matplotlib.pyplot as plt
+step 3: !pip install wikipedia
+
+code :
+from wordcloud import WordCloud,STOPWORDS
+import matplotlib.pyplot as plt
+import wikipedia as wp
+
+result=wp.page("DATA SCIENCE")
+final_result=result.content
+
+def plot_wordcloud(wc):
+    plt.axis("off")
+    plt.figure(figsize=(10,10))#size of figure
+    plt.imshow(wc) #image display
+    plt.show()#final image
+wc=WordCloud(width=500,height=500,background_color="cyan",random_state=10,stopwords=STOPWORDS).generate(final_result)  #woldcloud constructor    
+wc.to_file("ds.png")
+plot_wordcloud(wc)
+
+*****************************************************************
+
+2. Web scraping
+
+import pandas as pd
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+url="https://en.m.wikipedia.org/wiki/List_of_Asian_countries_by_area"
+page=urlopen(url)
+html_page=page.read().decode("utf-8")
+soup=BeautifulSoup(html_page,"html.parser")
+table=soup.find("table")
+SrNo=[]
+Country=[]
+Area=[]
+rows=table.find("tbody").find_all("tr")
+for row in rows:
+    cells=row.find_all("td")
+    if(cells):
+        SrNo.append(cells[0].get_text().strip("\n"))
+        Country.append(cells[1].get_text().strip("\xa0").strip("\n").strip('\[2]*'))
+        Area.append(cells[3].get_text().strip("\n").replace(",",""))
+countries_df=pd.DataFrame()
+countries_df["ID"]=SrNo
+countries_df["Country"]=Country
+countries_df["Area"]=Area
+print(countries_df.head(26))
+
+
+*******************JSON SCRAPPING***************
+
+
+import pandas as pd
+import urllib,json
+url= 'https://jsonplaceholder.typicode.com/users'
+response=urllib.request.urlopen(url)
+data=json.loads(response.read()) #json -> python data structure
+
+id1=[]
+username=[ ]
+email=[]
+for item in data:
+    if "id" in item.keys(): #check if id is present in dictionary
+        id1.append(item["id"])
+    else:
+        id1.append("NA")
+    if "username" in item.keys(): #check if id is present in dictionary
+        username.append(item["username"])
+    else:
+        username.append ("NA")
+    if "email" in item.keys():
+        email.append(item["email"])
+    else:
+        email.append("NA")
+
+print (id1)
+print (username)
+print (email)
+user_accounts=pd.DataFrame()
+user_accounts["USER 1D"]=id1
+user_accounts[ "USERNAME"]=username
+user_accounts["EMAIL"]=email
+user_accounts.head(10)
+
+
+
+******************************************
+
+PRACTICAL 3
+Exploratory Data Analysis of mtcars.csv Dataset in R ( Use functions of dplyr like select, 
+filter, mutate , rename, arrange, group by, summarize and data visualizations)
+
+
+
+1.cars_df=read.csv("mtcars.csv")
+View(cars_df)
+str(cars_df)
+
+
+2.dim(cars_df)
+
+3.names(cars_df)
+
+4.row.names(cars_df)
+  
+5.View(cars_df)
+
+
+#deploy the library
+library(dplyr)
+
+
+#select function
+df1=select(cars_df,mpg:hp)
+df1=cars_df%>%select(mpg:hp)
+View(df1)
+
+#filter row where gear is equal to 4 and select specific colss
+df1 <-mtcars %>%
+  filter(gear==4)%>%
+  select(disp,wt,gear,cyl)
+print(df1)
+
+
+#extract records where cy=4 or mpg>20 and col req are mpg,cyl
+df1=cars_df%>%filter(cyl==4 | mpg>20 ) %>% select(c(mpg,cyl))
+View(df1)
+
+
+#extract records where mpg<20 and carb=3
+df1=cars_df%>%filter(mpg<20 & carb==3) %>% select(c(mpg,carb))
+View(df1)
+
+
+#ARRANGE
+
+df1=cars_df%>%arrange(cyl,desc(mpg),desc(wt)) 
+View(df1)
+
+#RENAME
+
+df1=cars_df%>%rename(MilesperGallon=mpg, cylinder=cyl ,Displacement=disp)
+View(df1)
+
+#MUTATE
+
+df1=cars_df%>%mutate(power=hp*wt)
+View(df1)
+
+#GROUPBY
+
+cars_df$gear=as.factor(cars_df$gear)
+str(df1)
+
+step2 :summary_df=df1%>%group_by(df1$gear)%>%summarise(no=n(),mean_mpg=mean(mpg))
+       summary_df
+(execute 1 at time)
+
+
+#DATA VIZUALIZATIONS
+
+#HISTOGRAM
+hist(df1$mpg)
+hist(df1$mpg,main="histogram of MilesperGallon(mtcars)",col="lightgreen",xlab="MilesperGallon")
+
+
+#BOXPLOT
+
+summary(df1$mpg)
+boxplot(df1$mpg)
+
+
+#BarPLOT
+
+table(df$gear)
+barplot(table(df1$gear))
+
+#SCATTERPLOT
+
+plot(df1$mpg~df1$disp) 
+plot(df1$mpg~df1$gear) 
+plot(df1$mpg~df1$wt) 
+
+**********************************************************
+
+PRACTICAL 4 Exploratory data analysis in Python using Titanic Dataset – It is one of the most popular 
+datasets used for understanding machine learning basics. It contains information of all the 
+passengers aboard the RMS Titanic, which unfortunately was shipwrecked. This dataset can 
+be used to predict
+
+
+
+#!pip install Seaborn
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+#preprocessing
+%matplotlib inline
+
+titanic=pd.read_csv("train.csv")
+titanic.head()
+
+
+
+1. concise summary of the Titanic datase
+titanic.info() #structure
+
+
+
+2.#statistical info about column
+
+titanic.describe() 
+
+
+
+
+#check the number of missing values
+3.titanic.isnull().sum()
+
+
+
+4.
+titanic_cleaned=titanic.drop(['PassengerId','Name','Ticket','Cabin'],axis=1)
+  titanic_cleaned.info()
+
+
+
+5.
+#plotting count of passengers who survived on basis of sex using seaborn
+sns.catplot(x='Sex',hue='Survived',kind='count',data=titanic)#y->kind
+
+titanic_cleaned.groupby(['Sex','Survived'])['Survived'].count()
+
+
+
+
+6.
+create heatmaps to visualize the relationship between categorical variables in the Titanic dataset,
+ specifically "Sex" and "Survived", and "Pclass" and "Survived"
+
+
+grp1=titanic_cleaned.groupby(['Sex','Survived'])
+gender_survived=grp1.size().unstack()
+sns.heatmap(gender_survived,annot=True,fmt="d") # fmt-format d-> integer annot-annotation
+
+grp1=titanic_cleaned.groupby(['Pclass','Survived'])
+gender_survived=grp1.size().unstack()
+sns.heatmap(gender_survived,annot=True,fmt="d") # fmt-format d-> integer annot-annotation
+
+
+
+
+7.
+#violin-> for visualisation the distribution of a numerical variable across various classes
+sns.violinplot(x="Sex",y="Age",hue="Survived",data=titanic_cleaned, split=True)
+
+#imputing to handle age problem
+print("Oldest person on board: ",titanic_cleaned['Age'].max())
+print("Oldest person on board: ",titanic_cleaned['Age'].min())
+print("Oldest person on board: ",titanic_cleaned['Age'].mean())
+
+
+
+8.
+used to impute missing values in the "Age" column of the Titanic dataset based on the corresponding 
+"Pclass" values,and then it checks for any remaining missing values in the dataset.
+
+
+def impute(cols):
+    Age=cols[0]
+    Pclass=cols[1]
+    if pd.isnull(Age):
+        if Pclass==1:
+            return 34
+        elif Pclass==2:
+            return 29
+        else:
+            return 24
+    else:
+        return Age
+titanic_cleaned['Age']=titanic_cleaned[["Age","Pclass"]].apply(impute,axis=1) #apply userdefined fnc on given set of data
+
+titanic_cleaned.isnull().sum()
+
+
+
+9.
+#correlation
+titanic_cleaned.corr(method='pearson')
+
+*********************************************************
+
+PRACTICAL 5
+
+1.)Write a python program to build a regression model that could predict the salary of an 
+employee from the given experience and visualize univariate linear regression on it
+
+steps 
+1.from sklearn import datasets
+import numpy as np
+x,y,coef=datasets.make_regression(n_samples=100,n_features=1,n_informative=1,noise=10,coef=True,random_state=0) #independent, dependent
+#x->experience y->salary
+x=np.interp(x,(x.min(),x.max()),(0,20))  #interpolation
+print(len(x))
+print(x)
+
+
+2.
+y=np.interp(y,(y.min(),y.max()),(20000,150000))
+print(len(y))
+print(y)
+
+3.
+import matplotlib.pyplot as plt
+plt.plot(x,y,'.',label="Training data")
+plt.xlabel("Experience (in years)")
+plt.ylabel("Salary (in ruppees)")
+plt.title("Experience vs Salary")
+
+4.
+from sklearn.linear_model import LinearRegression
+reg_model=LinearRegression()
+reg_model.fit(x,y)
+y_pred=reg_model.predict(x) #pass X so that it will predict Y
+plt.plot(x,y_pred,color="black")
+plt.plot(x,y,'.',label="Training data")
+plt.xlabel("Experience (in years)")
+plt.ylabel("Salary (in ruppees)")
+plt.title("Experience vs Salary")
+
+5.
+import pandas as pd
+data={'Experience':np.round(x.flatten()),'Salary':np.round(y)}
+df=pd.DataFrame(data)
+df.head(10)
+
+6.
+x1=[[13.0]]
+y1=reg_model.predict(x1)
+print(np.round(y1,2))
+
+**********************************************
+
+#########5.2 prac 
+
+Write a python program to simulate linear model Y=10+7*x+e for random 100 samples and 
+visualize univariate linear regression on it
+
+
+
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt 
+
+reg_model1=LinearRegression()
+x=np.random.rand(100,1)
+yintercept=10
+slope=7
+error=np.random.rand(100,1)
+y=yintercept+ (slope*x) + error
+#print(y)
+
+reg_model1.fit(x,y)
+y_pred=reg_model1.predict(x) #pass X so that it will predict Y
+
+plt.scatter(x,y,s=10)
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.title("Equation regression model")
+plt.plot(x,y_pred,color="black")
+
+
+************************************************************
+
+
+PRACTICAL 6
+
+Write a python program to implement multiple linear regression on the Dataset Boston.csv
+
+1.
+import pandas as pd
+import matplotlib.pyplot as plt
+import sklearn
+boston =pd.read_csv("Boston.csv")
+boston.head()  #shows 5 lines in python and 6 is R
+
+
+2.
+boston.info()
+
+3.
+boston = boston.drop(columns="Unnamed: 0")
+boston.info()
+
+
+4.
+#index loc(iloc does splitting of existing dataframe)(before comma colon indicating rows i.e all selected)
+#After comma colon for columns indicating columns from 0,12
+boston_x=pd.DataFrame(boston.iloc[:,:13])  
+boston_y=pd.DataFrame(boston.iloc[:,-1])
+boston_y.head()
+
+
+5.
+from sklearn.model_selection import train_test_split
+X_train,X_test,Y_train,Y_test = train_test_split(boston_x,boston_y,test_size=0.3) 
+#3rd param is percentage of test data to be included (for 30% we can write as 0.3)
+#Thus train data is 70%
+print("xtrain Shape",X_train.shape)
+print("ytrain Shape",Y_train.shape)
+print("xtest Shape",X_test.shape)
+print("ytest Shape",Y_test.shape)
+
+
+6.
+
+from sklearn.linear_model import LinearRegression
+regression = LinearRegression()
+regression.fit(X_train,Y_train)
+Y_pred_linear = regression.predict(X_test)
+Y_pred_df = pd.DataFrame(Y_pred_linear,columns=["Predicted"])
+Y_pred_df.head()
+
+
+7.
+plt.scatter(Y_test,Y_pred_linear,c="blue")
+plt.xlabel("Actual Price(medv)")
+plt.ylabel("Predicted Price(medv)")
+plt.title("Actual vs Predicted")
+plt.show()
+
+**************************************************************************
+
+
+PRACTICAL 7
+K Nearest Neighbor classification Algorithm Write a python program to implement KNN 
+algorithm to predict breast cancer using breast cancer wisconsin dataset 
+
+
+
+1.
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+
+bc_df=load_breast_cancer()
+x=pd.DataFrame(bc_df.data,columns=bc_df.feature_names)  
+x.head()
+
+2.
+modify
+x=x[["mean area","mean compactness"]]
+x.head()
+
+
+3.
+y=pd.Categorical.from_codes(bc_df.target,bc_df.target_names)#categorical variable from data
+print(y)
+
+
+4.
+#benign=0 -> malignant  #`COnverting two categorical variable into one
+#benign=1 -> benign
+
+y=pd.get_dummies(y,drop_first=True) #dropping malignant
+print(y)
+
+
+5.
+##splitting the data into training and testing sets
+
+X_train,X_test,Y_train,Y_test=train_test_split(x,y,random_state=1) #Skipping ratio will give bydefault 70-30
+#recreate the same randomness everytime we run the function 
+knn=KNeighborsClassifier(n_neighbors=5,metric="euclidean")
+knn.fit(X_train,Y_train
+
+
+6.
+
+sns.set() #scatterplot
+sns.scatterplot(x="mean area",y="mean compactness",hue="benign",data=X_test.join(Y_test,how="outer"))
+
+
+7.
+#generates a scatter plot where the points are colored based on the predicted class labels 
+
+y_pred=knn.predict(X_test)
+plt.scatter(X_test["mean area"],X_test["mean compactness"],c=y_pred,cmap="coolwarm",alpha=0.7) #size of graph
+plt.show()
+
+
+
+8.
+
+#Y_test--> actual  Y_pred-->Predicted
+cf=confusion_matrix(Y_test,y_pred)
+print(cf)
+
+
+9.
+
+labels=["True Negative","False Positive","False Negative","True Positive"]
+labels=np.asarray(labels).reshape(2,2)
+categories=["Zero","One"]
+ax=plt.subplot()
+sns.heatmap(cf,annot=True,ax=ax)
+ax.set_xlabel("Predicted Values")
+ax.set_ylabel("Actual Values")
+ax.set_title("Confusion Matrix")
+ax.xaxis.set_ticklabels(["Malignant","Benign"])
+ax.yaxis.set_ticklabels(["Malignant","Benign"])
+
+
+
+10.
+
+tp,fn,fp,tn = confusion_matrix(Y_test,y_pred,labels=[1,0]).reshape(-1)
+print("Values of tp fn fp tn" ,tp, fn, fp, tn)
+#fn is better than fp
+
+
+11.
+accuracy=(tp+tn)/(tp+fp+fn+tn)
+print(accuracy)
+
+
+12.
+Precision=tp/(fp+tp)
+print(Precision)
+
+
+13.
+Recall=tp/(tp+fn)
+print(Recall)
+
+14.#f1score
+from sklearn.metrics import f1_score
+f1_score(Y_test,y_pred)
+
+
+15.#roc auc score
+from sklearn.metrics import roc_auc_score
+roc_auc_score(Y_test,y_pred)
+
+
+************************************************************
+
+
+MONGO DB
+
+use <ur database name>
+
+# use to insert records
+
+db.staff.insertMany( [
+    {empid:101,empname:"Hritika", salary:4000,designation:"engineer" },
+    {empid:112,empname:"Supriya", salary:3040,designation:"HR" },
+    {empid:143,empname:"Mansi", salary:2300,designation:"accountant" },
+    {empid:102,empname:"Vedant", salary:9000,designation:"manager" },
+    {empid:145,empname:"Monisha", salary:5000,designation:"employee" },
+    {empid:115,empname:"Ritesh", salary:34000,designation:"manager" },
+    {empid:178,empname:"Bhaskar", salary:79000,designation:"analyst" },
+    {empid:192,empname:"Dinesh", salary:2900,designation:"marketing" },
+    {empid:176,empname:"Meenakshi", salary:21000,designation:"engnineer" },
+    {empid:189,empname:"Suresh", salary:5600,designation:"HR" },
+] );
+
+1.Sort the documents in descending order of Salary
+
+db.staff.find({},{_id:0,empid:1,salary:1}).sort({salary:-1})
+
+
+2. Display employee with designation with “Manager” or salary greater than Rs. 50,000/-
+
+db.staff.find({$or: [{designation:"Manager"}, {salary: {$gt:50000}}]},{_id:0,salary:1,designation:1})
+
+
+3.Update the salary of all employees with designation as “Accountant” to Rs.45000
+
+db.staff.updateMany({designation:"accountant"}, {$set: {salary:45000}} );
+db.staff.find({designation:"accountant"})
+
+
+4.Remove the documents of employees whose salary is greater than Rs100000
+
+db.staff.remove({salary :{$gt:100000}})
+db.staff.find()
+
+
+***************
+
+5.display all documents in Student
+
+
+db.students.insertMany( [
+    {rollno:21,name:"Hrtika",class:"MSC",totalmarks:400 },
+    {rollno:22,name:"Supriya",class:"TYCS",totalmarks:450},
+    {rollno:23,name:"Meenakshi",class:"MSC",totalmarks:380 },
+    {rollno:24,name:"Sunaji",class:"TYCS",totalmarks:290 },
+    {rollno:25,name:"Mansi",class:"TYCS",totalmarks:348 },
+    {rollno:26,name:"Vedont",class:"MSC",totalmarks:456 },
+    {rollno:27,name:"Supz",class:"MSC",totalmarks:300 },
+    {rollno:28,name:"Bhaskar",class:"TYCS",totalmarks:490 },
+    {rollno:29,name:"Rithend",class:"TYCS",totalmarks:267 },
+    {rollno:30,name:"Jestin",class:"MSC",totalmarks:230 },
+] );
+
+
+db.students.find({},{_id:0,name:1,totalmarks:1}).sort({totalmarks:-1})
+
+
+3.Display students of class “MSc” or marks greater than 400.
+
+db.students.find({ $or:[ {class :"MSC" }, {totalmarks: {$gt:400}}]},{_id:0})
+
+4.remove all documents
+
+db.students.remove({totalmarks: {$lt:200}})
+db.students.find()
+
+
+
+
+
+
+
+
+
